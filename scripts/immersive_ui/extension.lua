@@ -7,6 +7,7 @@ M.hideThreshold = 10 / 3.6 -- 10 kph in m/s
 M.showThreshold = 1 / 3.6  -- 1 kph in m/s
 M.immersiveUiEnabled = true
 M.immersed = false
+M.wasControlingImmersion = false
 
 local function onExtensionLoaded()
     log('I', M.logTag, '>>>>>>>>>>>>>>>>>>>>> onExtensionLoaded from sopo imm. ui')
@@ -36,19 +37,29 @@ local function updateUIVisibility()
     local speed = veh:getVelocity():length()
     local isInReplay = core_replay.state.state == "playback"
     local isPlaying = M.uiState == "play"
+    local isPaused = simTimeAuthority.getPause()
 
     -- log('I', M.logTag, 'speed: ' .. speed .. ' isInReplay: ' .. tostring(isInReplay) .. ' isPlaying: ' .. tostring(isPlaying))
 
-    if M.immersiveUiEnabled and isPlaying and not isInReplay  then
+    local shouldControlImmersion = M.immersiveUiEnabled and isPlaying and not isInReplay and not isPaused
+
+    if shouldControlImmersion then
+        local newImmersed = false
         if speed > M.hideThreshold then
-            M.immersed = true
+            newImmersed = true
         elseif speed < M.showThreshold then
-            M.immersed = false
+            newImmersed = false
         end
-        setVisibility(not M.immersed)
-    else
+        -- only update if the state has changed
+        if not M.immersed == newImmersed or not M.wasControlingImmersion == shouldControlImmersion then
+            M.immersed = newImmersed
+            setVisibility(not M.immersed)
+        end
+    elseif M.wasControlingImmersion then
         setVisibility(true)
     end
+
+    M.wasControlingImmersion = shouldControlImmersion
 end
 
 local function onUiChangedState(curState, prevState)
