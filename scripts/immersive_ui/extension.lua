@@ -2,12 +2,12 @@ M = {}
 M.logTag = 'immersive_ui'
 M.tick = 0
 
-M.hideThreshold = 10 / 3.6 -- 10 kph in m/s
-M.showThreshold = 1 / 3.6  -- 1 kph in m/s
-M.immersionExitTimeout = 1.0 -- seconds
+M.enterImmersionSpeed = 10 / 3.6 -- 10 kph in m/s
+M.exitImmersionSpeed = 1 / 3.6  -- 1 kph in m/s
+M.exitImmersionWaitTime = 1.0 -- seconds
 
 M.uiState = ''
-M.immersionExitTimer = 0
+M.exitImmersionTimer = 0
 M.immersiveUiEnabled = true
 M.immersed = false
 M.wasControllingImmersion = false
@@ -48,18 +48,18 @@ local function updateUIVisibility()
     local shouldControlImmersion = M.immersiveUiEnabled and isPlaying and isDriverCam and not isInReplay and not isPaused
 
     -- track immersion exit timer
-    if M.immersed and speed < M.showThreshold then
-        M.immersionExitTimer = M.immersionExitTimer + 0.1
+    if M.immersed and speed < M.exitImmersionSpeed then
+        M.exitImmersionTimer = M.exitImmersionTimer + 0.1
     else
-        M.immersionExitTimer = 0
+        M.exitImmersionTimer = 0
     end
 
     -- compute immersion
     local newImmersed = M.immersed
 
-    if speed > M.hideThreshold then
+    if speed > M.enterImmersionSpeed then
         newImmersed = true
-    elseif speed < M.showThreshold and M.immersionExitTimer >= M.immersionExitTimeout then
+    elseif speed < M.exitImmersionSpeed and M.exitImmersionTimer >= M.exitImmersionWaitTime then
         newImmersed = false
     end
 
