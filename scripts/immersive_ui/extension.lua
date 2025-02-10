@@ -37,11 +37,12 @@ local function updateUIVisibility()
     local speed = veh:getVelocity():length()
     local isInReplay = core_replay.state.state == "playback"
     local isPlaying = M.uiState == "play"
+    local isDriverCam = core_camera.getActiveCamName() == "driver"
     local isPaused = simTimeAuthority.getPause()
 
     -- log('I', M.logTag, 'speed: ' .. speed .. ' isInReplay: ' .. tostring(isInReplay) .. ' isPlaying: ' .. tostring(isPlaying))
 
-    local shouldControlImmersion = M.immersiveUiEnabled and isPlaying and not isInReplay and not isPaused
+    local shouldControlImmersion = M.immersiveUiEnabled and isPlaying and isDriverCam and not isInReplay and not isPaused
 
     if shouldControlImmersion then
         local newImmersed = false
@@ -78,13 +79,9 @@ local function onUpdate(dt)
     M.updateUIVisibility()
 end
 
-local function test()
-    ui_visibility.toggle()
-end
-
 M.onExtensionLoaded = onExtensionLoaded
 M.onUiChangedState = onUiChangedState
 M.updateUIVisibility = updateUIVisibility
 M.onUpdate = onUpdate
-M.test = test
+
 return M
