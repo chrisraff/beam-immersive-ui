@@ -105,9 +105,19 @@ local function onUpdate(dt)
     M.updateUIVisibility()
 end
 
+local function setMode(mode)
+    if mode == nil then
+        M.settings.immersiveUiEnabled = not M.settings.immersiveUiEnabled
+    else
+        M.settings.immersiveUiEnabled = mode
+    end
+    jsonWriteFile('settings/beam_immersive_ui/settings.json', M.settings)
+end
+
 M.onExtensionLoaded = onExtensionLoaded
 M.onUiChangedState = onUiChangedState
 M.updateUIVisibility = updateUIVisibility
 M.onUpdate = onUpdate
+M.setMode = setMode
 
 return M

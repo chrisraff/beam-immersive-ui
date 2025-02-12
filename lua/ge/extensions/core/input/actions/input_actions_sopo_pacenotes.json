@@ -1,0 +1,5 @@
+{
+	"immers_toggle":{ "title":"Immersive UI Toggle", "desc":"Toggle auto-hiding of UI", "order": 310, "cat":"general", "ctx": "tlua", "onDown":"scripts_immersive__ui_extension.setMode()"},
+	"immers_on":	{ "title":"Immersive UI On", "desc":"Turn on auto-hiding of UI", "order": 310.1, "cat":"general", "ctx": "tlua", "onDown":"scripts_immersive__ui_extension.setMode(true)" },
+	"immers_off":	{ "title":"Immersive UI Off", "desc":"Turn off auto-hiding of UI", "order": 310.2, "cat":"general", "ctx": "tlua", "onDown":"scripts_immersive__ui_extension.setMode(false)" }
+}
