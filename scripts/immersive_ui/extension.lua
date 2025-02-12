@@ -1,14 +1,16 @@
-M = {}
+local M = {}
 M.logTag = 'immersive_ui'
 M.tick = 0
 
-M.enterImmersionSpeed = 10 / 3.6 -- 10 kph in m/s
-M.exitImmersionSpeed = 1 / 3.6  -- 1 kph in m/s
-M.exitImmersionWaitTime = 1.0 -- seconds
+M.settings = {
+    enterImmersionSpeed = 10 / 3.6, -- 10 kph in m/s
+    exitImmersionSpeed = 1 / 3.6,  -- 1 kph in m/s
+    exitImmersionWaitTime = 1.0, -- seconds
+    immersiveUiEnabled = true
+}
 
 M.uiState = ''
 M.exitImmersionTimer = 0
-M.immersiveUiEnabled = true
 M.immersed = false
 M.wasControllingImmersion = false
 
@@ -16,6 +18,18 @@ local function onExtensionLoaded()
     log('I', M.logTag, '>>>>>>>>>>>>>>>>>>>>> onExtensionLoaded from sopo imm. ui')
 
     setExtensionUnloadMode(M, 'manual')
+
+    -- load the settings
+    local settingsFile = jsonReadFile('settings/beam_immersive_ui/settings.json')
+    if settingsFile then
+        for key, value in pairs(M.settings) do
+            if settingsFile[key] == nil then
+                log('I', M.logTag, 'populating ' .. key .. ' from default')
+                settingsFile[key] = value
+            end
+        end
+        M.settings = settingsFile
+    end
 end
 
 local function setVisibility(visible)
@@ -25,10 +39,8 @@ local function setVisibility(visible)
     end
 
     if visible and not ui_visibility.get() then
-        log('I', M.logTag, 'Showing UI')
         ui_visibility.toggle()
     elseif not visible and ui_visibility.get() then
-        log('I', M.logTag, 'Hiding UI')
         ui_visibility.toggle()
     end
 end
@@ -45,10 +57,10 @@ local function updateUIVisibility()
 
     -- log('I', M.logTag, 'speed: ' .. speed .. ' isInReplay: ' .. tostring(isInReplay) .. ' isPlaying: ' .. tostring(isPlaying))
 
-    local shouldControlImmersion = M.immersiveUiEnabled and isPlaying and isDriverCam and not isInReplay and not isPaused
+    local shouldControlImmersion = M.settings.immersiveUiEnabled and isPlaying and isDriverCam and not isInReplay and not isPaused
 
     -- track immersion exit timer
-    if M.immersed and speed < M.exitImmersionSpeed then
+    if M.immersed and speed < M.settings.exitImmersionSpeed then
         M.exitImmersionTimer = M.exitImmersionTimer + 0.1
     else
         M.exitImmersionTimer = 0
@@ -57,9 +69,9 @@ local function updateUIVisibility()
     -- compute immersion
     local newImmersed = M.immersed
 
-    if speed > M.enterImmersionSpeed then
+    if speed > M.settings.enterImmersionSpeed then
         newImmersed = true
-    elseif speed < M.exitImmersionSpeed and M.exitImmersionTimer >= M.exitImmersionWaitTime then
+    elseif speed < M.settings.exitImmersionSpeed and M.exitImmersionTimer >= M.settings.exitImmersionWaitTime then
         newImmersed = false
     end
 
